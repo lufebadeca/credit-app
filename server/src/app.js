@@ -22,7 +22,19 @@ const clientDist = possiblePaths.find((p) => fs.existsSync(p));
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'blob:'],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", 'https://generativelanguage.googleapis.com'],
+      fontSrc: ["'self'", 'data:'],
+      baseUri: ["'self'"]
+    }
+  }
+}));
 app.use(cors({ origin: process.env.CORS_ORIGIN || 'http://localhost:5173' }));
 app.use(express.json());
 app.use(mongoSanitize());
