@@ -2,25 +2,33 @@
 
 Aplicación web para registrar y consultar créditos. Desarrollada como prueba técnica.
 
+## Características principales
+
+- **Selector de tipo de tasa de interés** con calculadora de equivalencia (efectiva anual ↔ efectiva mensual)
+- **Enrutamiento por vistas**: nuevo crédito, consulta de créditos, detalle de un crédito
+- **Tabla de amortización** en la página de detalle de cada crédito (sistema de cuota fija)
+- **Chat con IA** para consultas sobre créditos, tasas de interés, información general y navegación en la app
+- **Landing pública** para usuarios no autenticados con navbar y llamadas a la acción
+- **Envío de correo** al registrar un crédito (vía webhook Zapier/Make o Agenda + SMTP)
+
 ## Stack
 
 - **Frontend**: React (Vite), TypeScript, Tailwind CSS, Shadcn UI, Zod, React Hook Form
 - **Backend**: Node.js, Express, Mongoose
 - **Base de datos**: MongoDB (Atlas)
-- **Email**: Nodemailer + Agenda.js (jobs en segundo plano)
+- **Email**: Webhook (Zapier/Make) o Nodemailer + Agenda.js (jobs en segundo plano)
 
 ## Requisitos
 
-- Node.js 18+
+- Node.js 20+
 - MongoDB (local o Atlas)
-- Cuenta SMTP (Gmail, SendGrid, etc.)
 
 ## Configuración
 
 ### 1. Clonar e instalar
 
 ```bash
-git clone <repositorio>
+git clone https://github.com/lufebadeca/credit-app.git
 cd credit-app
 cd server && npm install
 cd ../client && npm install
@@ -34,48 +42,27 @@ Copia `.env.example` a `.env` en la carpeta `server`:
 cp server/.env.example server/.env
 ```
 
-Edita `server/.env`:
-
-```
-MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/credit-app?retryWrites=true&w=majority
-JWT_SECRET=tu_clave_secreta_muy_segura
-PORT=3000
-CORS_ORIGIN=http://localhost:5173
-
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=tu_email@gmail.com
-SMTP_PASS=tu_app_password
-```
-
-Ver [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md) para configuración detallada.
-
-**Gmail:** SMTP_USER = tu email, SMTP_PASS = contraseña de aplicación de 16 caracteres ([cómo generar](https://support.google.com/accounts/answer/185833)).
-
-**Turbo SMTP:** EMAIL_FROM debe estar verificado en el panel de Turbo SMTP.
+Edita `server/.env` con `MONGODB_URI`, `JWT_SECRET` y, opcionalmente, `WEBHOOK_EMAIL_URL` para el envío de correos. Ver [docs/WEBHOOK_EMAIL.md](docs/WEBHOOK_EMAIL.md).
 
 ### 3. Variables de entorno (Client)
 
 Crea `client/.env`:
 
 ```
-VITE_API_URL=https://tu-api.com/api
 VITE_GEMINI_API_KEY=tu_api_key_de_google_ai
 ```
 
-- `VITE_API_URL`: opcional en desarrollo (proxy a localhost:3000).
-- `VITE_GEMINI_API_KEY`: para el chat de IA con Gemini ([Google AI Studio](https://aistudio.google.com)).
+(Opcional para desarrollo: `VITE_API_URL` si el backend está en otra URL.)
 
 ### 4. Crear usuario inicial
 
 ```bash
-cd server
-npm run seed
+cd server && npm run seed
 ```
 
 Esto crea el usuario: `admin@fyasocialcapital.com` / `Admin123!`
 
-Opcional - datos de ejemplo del anexo:
+Opcional - datos de ejemplo:
 ```bash
 cd server && npm run seed:credits
 ```
@@ -97,48 +84,41 @@ cd client && npm run dev
 - Frontend: http://localhost:5173
 - Backend: http://localhost:3000
 
-### Producción
+### Producción (local)
 
 ```bash
-cd client && npm run build
-cd ../server && npm start
+npm run build
+npm start
 ```
 
-Sirve el frontend desde `client/dist` o despliega por separado.
-
-## Despliegue (Render o Railway)
+## Despliegue
 
 Frontend y backend se despliegan juntos: el servidor sirve el build estático del frontend.
 
 ### Render
 
-1. Crea cuenta en [render.com](https://render.com) y conecta tu repositorio.
+1. Cuenta en [render.com](https://render.com) → conecta el repo.
 2. **Nuevo Web Service** → selecciona el repo.
 3. Configura:
-   - **Root Directory:** (vacío = raíz)
    - **Build Command:** `cd server && npm install && cd ../client && npm install && npm run build`
    - **Start Command:** `cd server && npm start`
-4. En **Environment** añade:
-   - `MONGODB_URI` – URI de MongoDB Atlas
-   - `JWT_SECRET` – clave secreta para JWT
-   - `WEBHOOK_EMAIL_URL` – URL del webhook (Zapier/Make) para enviar correos al registrar créditos. Ver [docs/WEBHOOK_EMAIL.md](docs/WEBHOOK_EMAIL.md)
-   - `VITE_GEMINI_API_KEY` – (opcional) para el chat con IA
-
-Opcional: si tienes `render.yaml` en el repo, Render puede usarlo como Blueprint.
+4. En **Environment**: `MONGODB_URI`, `JWT_SECRET`, `WEBHOOK_EMAIL_URL` (opcional), `VITE_GEMINI_API_KEY` (opcional).
+5. Opcional: usar `render.yaml` como Blueprint.
 
 ### Railway
 
-1. Crea cuenta en [railway.app](https://railway.app) y conecta el repo.
+1. Cuenta en [railway.app](https://railway.app) → conecta el repo.
 2. **New Project** → **Deploy from GitHub**.
-3. En el servicio → **Settings** → configura:
+3. En el servicio → **Settings**:
    - **Build Command:** `npm run build`
-   - **Start Command:** `npm start` (o `node server/src/server.js`)
-   - **Root Directory:** `/` (raíz del repo)
-4. Añade las mismas variables de entorno que en Render.
+   - **Start Command:** `npm start`
+   - **Root Directory:** `/`
+4. **Variables**: `MONGODB_URI`, `JWT_SECRET`, `WEBHOOK_EMAIL_URL`, `VITE_GEMINI_API_KEY`.
+5. **Settings → Networking** → **Generate Domain** para exponer la app y obtener la URL pública.
 
 ### Después del deploy
 
-Ejecuta el seed para crear el usuario admin (desde local con `MONGODB_URI` apuntando a tu Atlas, o desde Railway/Render si ofrecen un shell):
+Ejecuta el seed para crear el usuario admin (con `MONGODB_URI` apuntando a tu Atlas):
 
 ```bash
 cd server && MONGODB_URI="<tu_uri>" npm run seed
@@ -153,17 +133,21 @@ credit-app/
 │   ├── src/
 │   │   ├── config/   # DB, Agenda
 │   │   ├── jobs/     # Envío de correo
+│   │   ├── lib/      # notifyCredit (webhook)
 │   │   ├── middleware/
 │   │   ├── models/
 │   │   ├── routes/
 │   │   └── schemas/
 │   └── .env.example
+├── docs/
+│   ├── EMAIL_SETUP.md
+│   └── WEBHOOK_EMAIL.md
 └── README.md
 ```
 
 ## Seguridad
 
-- **Helmet**: Headers HTTP seguros
+- **Helmet**: Headers HTTP seguros y CSP configurado
 - **express-mongo-sanitize**: Prevención de inyección NoSQL
 - **Zod**: Validación estricta de entradas
 - **JWT**: Autenticación para rutas protegidas
