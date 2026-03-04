@@ -33,7 +33,11 @@ export function LoginPage() {
     handleSubmit,
     formState: { errors, isSubmitting }
   } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema)
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'admin@fyasocialcapital.com',
+      password: 'Admin123!'
+    }
   });
 
   const onSubmit = async (data: LoginFormValues) => {
