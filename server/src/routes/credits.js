@@ -3,6 +3,7 @@ import Credit from '../models/Credit.js';
 import { creditSchema } from '../schemas/creditSchema.js';
 import { validate } from '../middleware/validate.js';
 import { protect } from '../middleware/auth.js';
+import { notifyCreditRegistered, hasWebhook } from '../lib/notifyCredit.js';
 
 const router = Router();
 
@@ -18,7 +19,15 @@ router.post('/', validate(creditSchema), async (req, res) => {
       plazoMeses: Number(validated.plazoMeses)
     };
     const credit = await Credit.create(data);
-    if (req.agenda) {
+
+    // Notificación en segundo plano: webhook (Zapier/Make) o Agenda
+    const sent = notifyCreditRegistered({
+      nombreCliente: credit.nombreCliente,
+      valorCredito: credit.valorCredito,
+      comercialRegistra: credit.comercialRegistra,
+      fechaRegistro: credit.fechaRegistro
+    });
+    if (!sent && req.agenda) {
       req.agenda.now('sendCreditEmail', {
         nombreCliente: credit.nombreCliente,
         valorCredito: credit.valorCredito,
@@ -26,6 +35,7 @@ router.post('/', validate(creditSchema), async (req, res) => {
         fechaRegistro: credit.fechaRegistro
       }).catch((err) => console.warn('Error al encolar email:', err.message));
     }
+
     res.status(201).json(credit);
   } catch (err) {
     if (err.code === 11000) {
