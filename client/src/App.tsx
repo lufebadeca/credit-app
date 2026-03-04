@@ -1,0 +1,72 @@
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
+import { AppLayout } from '@/components/AppLayout';
+import { LoginPage } from '@/pages/LoginPage';
+import { RegistrarCreditoPage } from '@/pages/RegistrarCreditoPage';
+import { ConsultaCreditosPage } from '@/pages/ConsultaCreditosPage';
+import { AmortizacionPage } from '@/pages/AmortizacionPage';
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <RegistrarCreditoPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/registrar"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <RegistrarCreditoPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/consulta"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ConsultaCreditosPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/creditos/:id/amortizacion"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <AmortizacionPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/registrar" replace />} />
+    </Routes>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
