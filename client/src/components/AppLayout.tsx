@@ -1,7 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { FilePlus, List, BookOpen, LogOut } from 'lucide-react';
+import { FilePlus, List, BookOpen, LogOut, Menu, X } from 'lucide-react';
 import logFya from '@/assets/logFya.png';
 import { ChatWidget } from '@/components/ChatWidget';
 
@@ -14,18 +15,28 @@ const navItems = [
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
+
+  useEffect(() => {
+    const handleResize = () => { if (window.innerWidth >= 768) setMenuOpen(false); };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card sticky top-0 z-40">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <Link to="/registrar" className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-4">
+            <Link to="/registrar" className="flex items-center gap-2 shrink-0">
               <img src={logFya} alt="Fya Social Capital" className="h-8 object-contain" />
               <span className="text-lg font-semibold">Credit App</span>
               <span className="text-sm text-muted-foreground hidden sm:inline">Fya Social Capital</span>
             </Link>
-            <nav className="flex flex-wrap items-center gap-1">
+
+            <nav className="hidden md:flex items-center gap-1">
               {navItems.map(({ to, label, icon: Icon }) => (
                 <Link key={to} to={to}>
                   <Button
@@ -39,11 +50,50 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               ))}
             </nav>
-            <Button variant="outline" size="sm" onClick={logout} className="gap-2 w-fit">
-              <LogOut className="size-4" />
-              Cerrar sesión
-            </Button>
+
+            <div className="hidden md:flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={logout} className="gap-2">
+                <LogOut className="size-4" />
+                Cerrar sesión
+              </Button>
+            </div>
+
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+              aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            >
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
+
+          {menuOpen && (
+            <div className="md:hidden mt-4 pb-2 border-t pt-4 animate-in slide-in-from-top-2 duration-200">
+              <div className="flex flex-col gap-1">
+                {navItems.map(({ to, label, icon: Icon }) => (
+                  <Link key={to} to={to} onClick={closeMenu}>
+                    <Button
+                      variant={location.pathname.startsWith(to) ? 'default' : 'ghost'}
+                      size="sm"
+                      className="w-full justify-start gap-2"
+                    >
+                      <Icon className="size-4" />
+                      {label}
+                    </Button>
+                  </Link>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { closeMenu(); logout(); }}
+                  className="w-full justify-start gap-2 mt-2"
+                >
+                  <LogOut className="size-4" />
+                  Cerrar sesión
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </header>
       <main className="container mx-auto px-4 py-6">
