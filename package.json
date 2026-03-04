@@ -13,6 +13,6 @@
     "start": "node server/src/server.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }
