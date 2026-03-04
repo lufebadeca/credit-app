@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatTasa } from '@/lib/format';
 import { Link } from 'react-router-dom';
 
 type Credit = {
@@ -186,7 +186,7 @@ export function CreditTable() {
                     <TableCell>{c.nombreCliente}</TableCell>
                     <TableCell>{formatCurrency(c.valorCredito)}</TableCell>
                     <TableCell>{c.plazoMeses}</TableCell>
-                    <TableCell>{c.tasaInteres}%</TableCell>
+                    <TableCell>{formatTasa(c.tasaInteres)}% (EM)</TableCell>
                     <TableCell>{c.comercialRegistra}</TableCell>
                     <TableCell>{formatDate(c.fechaRegistro)}</TableCell>
                     <TableCell>

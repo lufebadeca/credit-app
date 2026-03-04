@@ -5,6 +5,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { RegistrarCreditoPage } from '@/pages/RegistrarCreditoPage';
 import { ConsultaCreditosPage } from '@/pages/ConsultaCreditosPage';
 import { AmortizacionPage } from '@/pages/AmortizacionPage';
+import { ComoObtenerTuCreditoPage } from '@/pages/ComoObtenerTuCreditoPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
@@ -42,6 +43,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <AppLayout>
               <ConsultaCreditosPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/como-obtener-credito"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <ComoObtenerTuCreditoPage />
             </AppLayout>
           </ProtectedRoute>
         }

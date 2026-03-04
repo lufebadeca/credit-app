@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatTasa } from '@/lib/format';
 import { generarTablaAmortizacion } from '@/lib/amortizacion';
 import { ArrowLeft } from 'lucide-react';
 
@@ -83,7 +83,7 @@ export function AmortizacionPage() {
         <h2 className="text-2xl font-semibold tracking-tight">Tabla de amortización</h2>
         <p className="text-muted-foreground">
           Crédito de cuota constante — {credit.nombreCliente}. Valor:{' '}
-          {formatCurrency(credit.valorCredito)}, {credit.tasaInteres}% efectivo mensual,{' '}
+          {formatCurrency(credit.valorCredito)}, {formatTasa(credit.tasaInteres)}% efectivo mensual,{' '}
           {credit.plazoMeses} meses.
         </p>
       </div>
@@ -99,7 +99,7 @@ export function AmortizacionPage() {
             <dt className="text-muted-foreground">Valor del crédito</dt>
             <dd>{formatCurrency(credit.valorCredito)}</dd>
             <dt className="text-muted-foreground">Tasa de interés (efectivo mensual)</dt>
-            <dd>{credit.tasaInteres}%</dd>
+            <dd>{formatTasa(credit.tasaInteres)}%</dd>
             <dt className="text-muted-foreground">Plazo</dt>
             <dd>{credit.plazoMeses} meses</dd>
             <dt className="text-muted-foreground">Cuota fija mensual</dt>

@@ -56,13 +56,15 @@ Ver [docs/EMAIL_SETUP.md](docs/EMAIL_SETUP.md) para configuración detallada.
 
 ### 3. Variables de entorno (Client)
 
-Opcional. Para producción, crea `client/.env`:
+Crea `client/.env`:
 
 ```
 VITE_API_URL=https://tu-api.com/api
+VITE_GEMINI_API_KEY=tu_api_key_de_google_ai
 ```
 
-En desarrollo, el proxy de Vite apunta a `http://localhost:3000`.
+- `VITE_API_URL`: opcional en desarrollo (proxy a localhost:3000).
+- `VITE_GEMINI_API_KEY`: para el chat de IA con Gemini ([Google AI Studio](https://aistudio.google.com)).
 
 ### 4. Crear usuario inicial
 

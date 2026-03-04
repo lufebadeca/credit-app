@@ -12,30 +12,55 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { aEfectivoMensual } from '@/lib/tasasInteres';
+import { toast } from 'sonner';
 
 export function CreditForm({ onSuccess }: { onSuccess?: () => void }) {
   const form = useForm<CreditFormValues>({
-    resolver: zodResolver(creditSchema) as never
+    resolver: zodResolver(creditSchema) as never,
+    defaultValues: { tipoTasa: 'mensual', tasaInteresInput: undefined }
   });
 
   const {
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting }
   } = form;
 
+  const tipoTasa = watch('tipoTasa') as 'anual' | 'mensual';
+  const tasaInput = watch('tasaInteresInput');
+  const numTasa = Number(tasaInput);
+  const tasaMensualEquiv =
+    tasaInput != null && String(tasaInput).trim() !== '' && !Number.isNaN(numTasa)
+      ? aEfectivoMensual(numTasa, tipoTasa)
+      : null;
+
   const onSubmit = async (data: CreditFormValues) => {
+    const tasaMensual =
+      data.tipoTasa === 'mensual'
+        ? Number(data.tasaInteresInput)
+        : aEfectivoMensual(Number(data.tasaInteresInput), 'anual');
     try {
       await createCredit({
         nombreCliente: data.nombreCliente,
         cedulaId: data.cedulaId,
         valorCredito: data.valorCredito,
-        tasaInteres: data.tasaInteres,
+        tasaInteres: tasaMensual,
         plazoMeses: data.plazoMeses,
         comercialRegistra: data.comercialRegistra
       });
       reset();
+      toast.success('Crédito registrado correctamente');
       onSuccess?.();
     } catch (e) {
       throw e;
@@ -91,19 +116,53 @@ export function CreditForm({ onSuccess }: { onSuccess?: () => void }) {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="tasaInteres">Tasa de interés (%)</Label>
+              <Label>Tipo de tasa</Label>
+              <Select
+                value={tipoTasa}
+                onValueChange={(v) => setValue('tipoTasa', v as 'anual' | 'mensual')}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mensual">Efectivo mensual</SelectItem>
+                  <SelectItem value="anual">Efectivo anual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tasaInteresInput">
+                Tasa ({tipoTasa === 'anual' ? 'anual' : 'mensual'}) %
+              </Label>
               <Input
-                id="tasaInteres"
+                id="tasaInteresInput"
                 type="number"
                 step="0.01"
                 min="0"
                 max="100"
-                placeholder="Ej: 2 o 2.5"
-                {...register('tasaInteres')}
+                placeholder={tipoTasa === 'anual' ? 'Ej: 24' : 'Ej: 2'}
+                {...register('tasaInteresInput')}
               />
-              {errors.tasaInteres && (
-                <p className="text-sm text-destructive">{errors.tasaInteres.message}</p>
+              {errors.tasaInteresInput && (
+                <p className="text-sm text-destructive">{errors.tasaInteresInput.message}</p>
               )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="equivalenteMensual">Equivalente efectivo mensual</Label>
+              <Input
+                id="equivalenteMensual"
+                readOnly
+                disabled
+                className="bg-muted"
+                value={
+                  tasaMensualEquiv !== null
+                    ? `${tasaMensualEquiv.toFixed(4)}%`
+                    : '—'
+                }
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="plazoMeses">Plazo (meses)</Label>

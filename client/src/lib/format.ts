@@ -5,3 +5,7 @@ export function formatCurrency(value: number): string {
   }).format(value);
   return `$ ${formatted}`;
 }
+
+export function formatTasa(value: number, decimals = 3): string {
+  return value.toFixed(decimals);
+}
