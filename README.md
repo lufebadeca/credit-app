@@ -106,14 +106,43 @@ cd ../server && npm start
 
 Sirve el frontend desde `client/dist` o despliega por separado.
 
-## Despliegue sugerido
+## Despliegue (Render o Railway)
 
-| Componente | Plataforma | Notas |
-|------------|------------|-------|
-| Frontend | Vercel | Conectar repo, build command: `cd client && npm run build`, output: `client/dist` |
-| Backend | Render | Web Service, Node, comando: `cd server && npm start`, variables de entorno |
-| Base de datos | MongoDB Atlas | Cluster gratuito |
-| Email | Gmail SMTP / SendGrid | Variables SMTP_* en el backend |
+Frontend y backend se despliegan juntos: el servidor sirve el build estático del frontend.
+
+### Render
+
+1. Crea cuenta en [render.com](https://render.com) y conecta tu repositorio.
+2. **Nuevo Web Service** → selecciona el repo.
+3. Configura:
+   - **Root Directory:** (vacío = raíz)
+   - **Build Command:** `cd server && npm install && cd ../client && npm install && npm run build`
+   - **Start Command:** `cd server && npm start`
+4. En **Environment** añade:
+   - `MONGODB_URI` – URI de MongoDB Atlas
+   - `JWT_SECRET` – clave secreta para JWT
+   - `WEBHOOK_EMAIL_URL` – URL del webhook (Zapier/Make) para enviar correos al registrar créditos. Ver [docs/WEBHOOK_EMAIL.md](docs/WEBHOOK_EMAIL.md)
+   - `VITE_GEMINI_API_KEY` – (opcional) para el chat con IA
+
+Opcional: si tienes `render.yaml` en el repo, Render puede usarlo como Blueprint.
+
+### Railway
+
+1. Crea cuenta en [railway.app](https://railway.app) y conecta el repo.
+2. **New Project** → **Deploy from GitHub**.
+3. En el servicio → **Settings** → configura:
+   - **Build Command:** `npm run build`
+   - **Start Command:** `npm start` (o `node server/src/server.js`)
+   - **Root Directory:** `/` (raíz del repo)
+4. Añade las mismas variables de entorno que en Render.
+
+### Después del deploy
+
+Ejecuta el seed para crear el usuario admin (desde local con `MONGODB_URI` apuntando a tu Atlas, o desde Railway/Render si ofrecen un shell):
+
+```bash
+cd server && MONGODB_URI="<tu_uri>" npm run seed
+```
 
 ## Estructura
 
@@ -141,4 +170,4 @@ credit-app/
 
 ## Licencia
 
-Privado - Fya Social Capital SAS
+Privado - Fya Social Capital SAS & Luis Baldovino

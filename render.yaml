@@ -1,0 +1,12 @@
+# Render Blueprint - despliegue del monorepo
+# https://render.com/docs/blueprint-spec
+# Variables: MONGODB_URI, JWT_SECRET, WEBHOOK_EMAIL_URL (opcional), VITE_GEMINI_API_KEY (opcional)
+
+services:
+  - type: web
+    name: credit-app
+    runtime: node
+
+    rootDir: .
+    buildCommand: cd server && npm install && cd ../client && npm install && npm run build
+    startCommand: cd server && npm start
