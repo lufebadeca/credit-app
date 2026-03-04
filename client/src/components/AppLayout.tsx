@@ -30,29 +30,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="border-b bg-card sticky top-0 z-40">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
-            <Link to="/registrar" className="flex items-center gap-2 shrink-0">
+            <Link to="/registrar" className="flex items-center gap-3 shrink-0">
               <img src={logFya} alt="Fya Social Capital" className="h-8 object-contain" />
-              <span className="text-lg font-semibold">Credit App</span>
-              <span className="text-sm text-muted-foreground hidden sm:inline">Fya Social Capital</span>
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-base font-semibold">Credit App</span>
+                <span className="text-xs text-muted-foreground">Fya Social Capital</span>
+              </div>
+              <span className="text-lg font-semibold sm:hidden">Credit App</span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1">
-              {navItems.map(({ to, label, icon: Icon }) => (
-                <Link key={to} to={to}>
-                  <Button
-                    variant={location.pathname.startsWith(to) ? 'default' : 'ghost'}
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <Icon className="size-4" />
-                    {label}
-                  </Button>
-                </Link>
-              ))}
-            </nav>
-
-            <div className="hidden md:flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={logout} className="gap-2">
+            <div className="hidden md:flex items-center gap-2 ml-auto">
+              <nav className="flex items-center gap-1">
+                {navItems.map(({ to, label, icon: Icon }) => (
+                  <Link key={to} to={to} className="cursor-pointer">
+                    <Button
+                      variant={location.pathname.startsWith(to) ? 'default' : 'ghost'}
+                      size="sm"
+                      className="gap-2 cursor-pointer transition-colors hover:opacity-90"
+                    >
+                      <Icon className="size-4" />
+                      {label}
+                    </Button>
+                  </Link>
+                ))}
+              </nav>
+              <Button variant="outline" size="sm" onClick={logout} className="gap-2 shrink-0 cursor-pointer transition-colors hover:opacity-90">
                 <LogOut className="size-4" />
                 Cerrar sesión
               </Button>
@@ -60,7 +62,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+              className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors cursor-pointer"
               aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
             >
               {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -71,11 +73,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="md:hidden mt-4 pb-2 border-t pt-4 animate-in slide-in-from-top-2 duration-200">
               <div className="flex flex-col gap-1">
                 {navItems.map(({ to, label, icon: Icon }) => (
-                  <Link key={to} to={to} onClick={closeMenu}>
+                  <Link key={to} to={to} onClick={closeMenu} className="cursor-pointer">
                     <Button
                       variant={location.pathname.startsWith(to) ? 'default' : 'ghost'}
                       size="sm"
-                      className="w-full justify-start gap-2"
+                      className="w-full justify-start gap-2 cursor-pointer transition-colors hover:opacity-90"
                     >
                       <Icon className="size-4" />
                       {label}
@@ -86,7 +88,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   variant="outline"
                   size="sm"
                   onClick={() => { closeMenu(); logout(); }}
-                  className="w-full justify-start gap-2 mt-2"
+                  className="w-full justify-start gap-2 mt-2 cursor-pointer transition-colors hover:opacity-90"
                 >
                   <LogOut className="size-4" />
                   Cerrar sesión

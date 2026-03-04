@@ -190,8 +190,8 @@ export function CreditTable() {
                     <TableCell>{c.comercialRegistra}</TableCell>
                     <TableCell>{formatDate(c.fechaRegistro)}</TableCell>
                     <TableCell>
-                      <Link to={`/creditos/${c._id}/amortizacion`}>
-                        <Button variant="outline" size="sm">
+                      <Link to={`/creditos/${c._id}/amortizacion`} className="cursor-pointer">
+                        <Button variant="outline" size="sm" className="cursor-pointer transition-colors hover:opacity-90">
                           Amortización
                         </Button>
                       </Link>

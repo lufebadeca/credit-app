@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import { AppLayout } from '@/components/AppLayout';
+import { LandingPage } from '@/pages/LandingPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegistrarCreditoPage } from '@/pages/RegistrarCreditoPage';
 import { ConsultaCreditosPage } from '@/pages/ConsultaCreditosPage';
@@ -13,20 +14,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function HomeRedirect() {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) return <Navigate to="/registrar" replace />;
+  return <LandingPage />;
+}
+
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<HomeRedirect />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <RegistrarCreditoPage />
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      />
       <Route
         path="/registrar"
         element={
@@ -67,7 +65,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="*" element={<Navigate to="/registrar" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
